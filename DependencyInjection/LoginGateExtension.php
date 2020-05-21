@@ -39,5 +39,6 @@ class LoginGateExtension extends Extension
         $container->setParameter('anyx.login_gate.storages', $chosenStorages);
         $container->setParameter('anyx.login_gate.brute_force_checker_options', $config['options']);
         $container->setParameter('anyx.login_gate.watch_period', $config['options']['watch_period']);
+        $container->setParameter('anyx.login_gate.method', $config['options']['method']);
     }
 }

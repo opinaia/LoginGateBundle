@@ -41,22 +41,22 @@ class CompositeStorage implements StorageInterface
     /**
      * @param \Symfony\Component\HttpFoundation\Request $request
      */
-    public function clearCountAttempts(Request $request)
+    public function clearCountAttempts($method, Request $request)
     {
         foreach ($this->getStorages() as $storage) {
-            $storage->clearCountAttempts($request);
+            $storage->clearCountAttempts($method, $request);
         }
     }
 
     /**
      * @param \Symfony\Component\HttpFoundation\Request $request
      */
-    public function getCountAttempts(Request $request)
+    public function getCountAttempts($method, Request $request)
     {
         $countAttempts = array();
         
         foreach ($this->getStorages() as $storage) {
-            $countAttempts[] = $storage->getCountAttempts($request);
+            $countAttempts[] = $storage->getCountAttempts($method, $request);
         }
 
         return (int) max($countAttempts);
@@ -66,11 +66,11 @@ class CompositeStorage implements StorageInterface
      * @param \Symfony\Component\HttpFoundation\Request $request
      * @return \DateTime | false
      */
-    public function getLastAttemptDate(Request $request)
+    public function getLastAttemptDate($method, Request $request)
     {
         $date = false;
         foreach ($this->getStorages() as $storage) {
-            $storageDate = $storage->getLastAttemptDate($request);
+            $storageDate = $storage->getLastAttemptDate($method, $request);
             if (!empty($storageDate) && (empty($date) || $storageDate->diff($date)->invert == 1)) {
                 $date = $storageDate;
             }
@@ -82,10 +82,10 @@ class CompositeStorage implements StorageInterface
      * @param \Symfony\Component\HttpFoundation\Request $request
      * @param \Symfony\Component\Security\Core\Exception\AuthenticationException $exception
      */
-    public function incrementCountAttempts(Request $request, AuthenticationException $exception)
+    public function incrementCountAttempts($method, Request $request, AuthenticationException $exception)
     {
         foreach ($this->getStorages() as $storage) {
-            $storage->incrementCountAttempts($request, $exception);
+            $storage->incrementCountAttempts($method, $request, $exception);
         }
     }
 }

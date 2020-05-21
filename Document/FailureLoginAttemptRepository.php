@@ -8,42 +8,58 @@ use Anyx\LoginGateBundle\Model\FailureLoginAttemptRepositoryInterface;
 class FailureLoginAttemptRepository extends Repository implements FailureLoginAttemptRepositoryInterface
 {
     /**
-     * @param string $ip
+     * @param string $method
+     * @param string $id
      * @param \DateTime $startDate
      * @return integer
      */
-    public function getCountAttempts($ip, \DateTime $startDate)
+    public function getCountAttempts($method, $id, \DateTime $startDate)
     {
+        if ($method == 'ip') {
+            $fieldName = 'ip';
+        } else {
+            $fieldName = 'username';
+        }
         return $this->createQueryBuilder()
-            ->field('ip')->equals($ip)
+            ->field($fieldName)->equals($id)
             ->field('createdAt')->gt($startDate)
             ->getQuery()->count();
     }
 
     /**
-     *
-     * @param string $ip
+     * @param string $method
+     * @param string $id
      * @return \Anyx\LoginGateBundle\Model\FailureLoginAttempt | null
      */
-    public function getLastAttempt($ip)
+    public function getLastAttempt($method, $id)
     {
+        if ($method == 'ip') {
+            $fieldName = 'ip';
+        } else {
+            $fieldName = 'username';
+        }
         return $this->createQueryBuilder()
-            ->field('ip')->equals($ip)
+            ->field($fieldName)->equals($id)
             ->sort('createdAt', 'desc')
             ->getQuery()
             ->getSingleResult();
     }
 
     /**
-     *
-     * @param string $ip
+     * @param string $method
+     * @param string $id
      * @return integer
      */
-    public function clearAttempts($ip)
+    public function clearAttempts($method, $id)
     {
+        if ($method == 'ip') {
+            $fieldName = 'ip';
+        } else {
+            $fieldName = 'username';
+        }
         return $this->createQueryBuilder()
             ->remove()
-            ->field('ip')->equals($ip)
+            ->field($fieldName)->equals($id)
             ->getQuery()
             ->execute();
     }

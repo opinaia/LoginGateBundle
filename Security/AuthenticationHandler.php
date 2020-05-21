@@ -24,13 +24,20 @@ class AuthenticationHandler implements EventSubscriberInterface
     private $storage;
 
     /**
+     * @var string
+     */
+    private $method;
+
+    /**
      * @param \Symfony\Component\HttpFoundation\RequestStack $requestStack
      * @param \Anyx\LoginGateBundle\Storage\StorageInterface $storage
+     * @param string $method
      */
-    public function __construct(RequestStack $requestStack, StorageInterface $storage)
+    public function __construct(RequestStack $requestStack, StorageInterface $storage, $method)
     {
         $this->requestStack = $requestStack;
         $this->storage = $storage;
+        $this->method = $method;
     }
 
     public static function getSubscribedEvents()
@@ -44,13 +51,13 @@ class AuthenticationHandler implements EventSubscriberInterface
     public function onAuthenticationFailure(AuthenticationFailureEvent $event)
     {
         $request = $this->getRequestStack()->getCurrentRequest();
-        $this->getStorage()->incrementCountAttempts($request, $event->getAuthenticationException());
+        $this->getStorage()->incrementCountAttempts($this->method, $request, $event->getAuthenticationException());
     }
 
     public function onInteractiveLogin(InteractiveLoginEvent $event)
     {
         $request = $this->getRequestStack()->getCurrentRequest();
-        $this->getStorage()->clearCountAttempts($request);
+        $this->getStorage()->clearCountAttempts($this->method, $request);
     }
 
     /**

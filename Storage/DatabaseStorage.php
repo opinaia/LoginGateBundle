@@ -20,6 +20,11 @@ class DatabaseStorage implements StorageInterface
     private $watchPeriod = 200;
 
     /**
+     * @var string
+     */
+    private $method = 'user';
+
+    /**
      * @var \Doctrine\Common\Persistence\ObjectManager
      */
     private $objectManager;
@@ -37,51 +42,70 @@ class DatabaseStorage implements StorageInterface
      * @param string $entityClass
      * @param integer $watchPeriod
      */
-    public function __construct(ObjectManager $objectManager, $entityClass, $watchPeriod)
+    public function __construct(ObjectManager $objectManager, $entityClass, $watchPeriod, $method)
     {
         $this->objectManager = $objectManager;
         $this->modelClassName = $entityClass;
         $this->watchPeriod = $watchPeriod;
+        $this->method = $method;
     }
 
     /**
+     * @param string $method
      * @param \Symfony\Component\HttpFoundation\Request $request
      */
-    public function clearCountAttempts(Request $request)
+    public function clearCountAttempts($method, Request $request)
     {
-        if (!$this->hasIp($request)) {
+        $id = $this->getIdByMethod($method, $request);
+        if (!$id) {
             return;
         }
+        $this->getRepository()->clearAttempts($method, $id);
+    }
 
-        $this->getRepository()->clearAttempts($request->getClientIp());
+    /**
+     * Get id value from given request determined by given method (ip/user)
+     *
+     * @param  string $method
+     * @param  Request $request
+     * @return string
+     */
+    private function getIdByMethod($method, $request)
+    {
+        if ($method == 'ip') {
+            if (!$this->hasIp($request)) {
+                return 0;
+            }
+            return $request->getClientIp();
+        } else {
+            return $request->get('_username');
+        }
     }
 
     /**
      * @param \Symfony\Component\HttpFoundation\Request $request
      * @return integer
      */
-    public function getCountAttempts(Request $request)
+    public function getCountAttempts($method, Request $request)
     {
-        if (!$this->hasIp($request)) {
-            return 0;
-        }
+        $id = $this->getIdByMethod($method, $request);
         $startWatchDate = new \DateTime();
         $startWatchDate->modify('-' . $this->getWatchPeriod(). ' second');
 
-        return $this->getRepository()->getCountAttempts($request->getClientIp(), $startWatchDate);
+        return $this->getRepository()->getCountAttempts($this->method, $id, $startWatchDate);
     }
 
     /**
      * @param \Symfony\Component\HttpFoundation\Request $request
      * @return \DateTime|false
      */
-    public function getLastAttemptDate(Request $request)
+    public function getLastAttemptDate($method, Request $request)
     {
-        if (!$this->hasIp($request)) {
-            return false;
+        $id = $this->getIdByMethod($method, $request);
+        if (!$id) {
+            return;
         }
-
-        $lastAttempt = $this->getRepository()->getLastAttempt($request->getClientIp());
+        $lastAttempt = $this->getRepository()->getLastAttempt($method, $id);
         if (!empty($lastAttempt)) {
             return $lastAttempt->getCreatedAt();
         }
@@ -90,10 +114,11 @@ class DatabaseStorage implements StorageInterface
     }
 
     /**
+     * @param  string $method
      * @param \Symfony\Component\HttpFoundation\Request $request
      * @param \Symfony\Component\Security\Core\Exception\AuthenticationException $exception
      */
-    public function incrementCountAttempts(Request $request, AuthenticationException $exception)
+    public function incrementCountAttempts($method, Request $request, AuthenticationException $exception)
     {
         if ($exception instanceof BruteForceAttemptException) {
             return;
@@ -115,6 +140,7 @@ class DatabaseStorage implements StorageInterface
         $username = $request->get('_username');
         if (!empty($username)) {
             $data['user'] = $username;
+            $model->setUsername($username);
         }
 
         $model->setData($data);
@@ -156,5 +182,15 @@ class DatabaseStorage implements StorageInterface
     protected function hasIp(Request $request)
     {
         return $request->getClientIp() != '';
+    }
+
+    protected function doCheckByIp()
+    {
+        return $this->method == 'ip' || $this->method == 'both';
+    }
+
+    protected function doCheckByUser()
+    {
+        return $this->method == 'user' || $this->method == 'both';
     }
 }
