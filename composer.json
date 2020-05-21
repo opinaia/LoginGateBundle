@@ -1,5 +1,5 @@
 {
-    "name": "anyx/login-gate-bundle",
+    "name": "ctoselli79/login-gate-bundle",
     "description": "Checking brute force attacks on site",
     "keywords": ["security", "brute-force"],
     "homepage": "https://github.com/anyx/LoginGateBundle",
