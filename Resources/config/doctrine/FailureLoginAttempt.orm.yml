@@ -13,6 +13,10 @@ Anyx\LoginGateBundle\Entity\FailureLoginAttempt:
         ip:
             type: string
             length: 45 #compatibility with ipv6
+        username:
+            type: string
+            length: 255
+            nullable: true
         createdAt:
             type: datetime
         data:

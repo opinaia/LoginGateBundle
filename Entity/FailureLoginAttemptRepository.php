@@ -8,18 +8,24 @@ use Anyx\LoginGateBundle\Model\FailureLoginAttemptRepositoryInterface;
 class FailureLoginAttemptRepository extends Repository implements FailureLoginAttemptRepositoryInterface
 {
     /**
-     * @param string $ip
+     * @param string $method
+     * @param string $id
      * @param \DateTime $startDate
      * @return integer
      */
-    public function getCountAttempts($ip, \DateTime $startDate)
+    public function getCountAttempts($method, $id, \DateTime $startDate)
     {
+        if ($method == 'ip') {
+            $fieldName = 'ip';
+        } else {
+            $fieldName = 'username';
+        }
         return $this->createQueryBuilder('attempt')
                     ->select('COUNT(attempt.id)')
-                    ->where('attempt.ip = :ip')
+                    ->where('attempt.' . $fieldName . ' = :id')
                     ->andWhere('attempt.createdAt > :createdAt')
                     ->setParameters(array(
-                        'ip'        => $ip,
+                        'id'        => $id,
                         'createdAt' => $startDate
                     ))
                     ->getQuery()
@@ -27,17 +33,22 @@ class FailureLoginAttemptRepository extends Repository implements FailureLoginAt
     }
     
     /**
-     * 
-     * @param string $ip
+     * @param string $method
+     * @param string $id
      * @return \Anyx\LoginGateBundle\Entity\FailureLoginAttempt | null
      */
-    public function getLastAttempt($ip)
+    public function getLastAttempt($method, $id)
     {
+        if ($method == 'ip') {
+            $fieldName = 'ip';
+        } else {
+            $fieldName = 'username';
+        }
         return $this->createQueryBuilder('attempt')
-                    ->where('attempt.ip = :ip')
+                    ->where('attempt.' . $fieldName . ' = :id')
                     ->orderBy('attempt.createdAt', 'DESC')
                     ->setParameters(array(
-                        'ip'        => $ip
+                        'id'        => $id
                     ))
                     ->getQuery()
                     ->setMaxResults(1)
@@ -46,14 +57,20 @@ class FailureLoginAttemptRepository extends Repository implements FailureLoginAt
     }
     
     /**
-     * @param string $ip
+     * @param string $method
+     * @param string $id
      * @return integer
      */
-    public function clearAttempts($ip)
+    public function clearAttempts($method, $id)
     {
+        if ($method == 'ip') {
+            $fieldName = 'ip';
+        } else {
+            $fieldName = 'username';
+        }
         return $this->getEntityManager()
-                ->createQuery('DELETE FROM ' . $this->getClassMetadata()->name . ' attempt WHERE attempt.ip = :ip')
-                ->execute(['ip' => $ip])
+                ->createQuery('DELETE FROM ' . $this->getClassMetadata()->name . ' attempt WHERE attempt.' . $fieldName . ' = :id')
+                ->execute(['id' => $id])
             ;
     }
 }

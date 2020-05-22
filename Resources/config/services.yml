@@ -10,6 +10,6 @@ services:
         arguments: ['@anyx.login_gate.attempt_storage', '%anyx.login_gate.brute_force_checker_options%']
     anyx.login_gate.autentication_handler:
         class: Anyx\LoginGateBundle\Security\AuthenticationHandler
-        arguments: ['@request_stack', '@anyx.login_gate.attempt_storage']
+        arguments: ['@request_stack', '@anyx.login_gate.attempt_storage', '%anyx.login_gate.method%' ]
         tags:
             - { name: kernel.event_subscriber }

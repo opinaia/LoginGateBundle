@@ -15,6 +15,11 @@ abstract class FailureLoginAttempt
     protected $ip;
 
     /**
+     * @var string
+     */
+    protected $username;
+
+    /**
      * @var \DateTime
      */
     protected $createdAt;
@@ -42,6 +47,16 @@ abstract class FailureLoginAttempt
     public function setIp($ip)
     {
         $this->ip = $ip;
+    }
+
+    public function getUsername()
+    {
+        return $this->username;
+    }
+
+    public function setUsername($username)
+    {
+        $this->username = $username;
     }
 
     public function getCreatedAt()

@@ -12,21 +12,21 @@ interface StorageInterface
      * @param \Symfony\Component\HttpFoundation\Request $request
      * @return integer
      */
-    public function getCountAttempts(Request $request);
+    public function getCountAttempts($method, Request $request);
 
     /**
      * @param \Symfony\Component\HttpFoundation\Request $request
      * @param \Symfony\Component\Security\Core\Exception\AuthenticationException $exception
      */
-    public function incrementCountAttempts(Request $request, AuthenticationException $exception);
+    public function incrementCountAttempts($method, Request $request, AuthenticationException $exception);
     
     /**
      * @param \Symfony\Component\HttpFoundation\Request $request
      */
-    public function clearCountAttempts(Request $request);
+    public function clearCountAttempts($method, Request $request);
 
     /**
      * @param \Symfony\Component\HttpFoundation\Request $request
      */
-    public function getLastAttemptDate(Request $request);
+    public function getLastAttemptDate($method, Request $request);
 }

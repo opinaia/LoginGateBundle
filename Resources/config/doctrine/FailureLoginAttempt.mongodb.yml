@@ -8,6 +8,9 @@ Anyx\LoginGateBundle\Document\FailureLoginAttempt:
         ip:
             type: string
             index: true
+        username:
+            type: string
+            index: true
         createdAt:
             type: date
         data:

@@ -3,5 +3,9 @@ parameters:
 services:
     anyx.login_gate.storage.orm:
         class: Anyx\LoginGateBundle\Storage\DatabaseStorage
-        arguments: ['@doctrine.orm.entity_manager', '%anyx.login_gate.orm.entity_class%', '%anyx.login_gate.watch_period%']
+        arguments:
+          - '@doctrine.orm.entity_manager'
+          - '%anyx.login_gate.orm.entity_class%'
+          - '%anyx.login_gate.watch_period%'
+          - '%anyx.login_gate.method%'
 

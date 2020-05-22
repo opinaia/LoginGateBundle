@@ -44,16 +44,45 @@ class BruteForceChecker
      */
     public function canLogin(Request $request)
     {
-        if ($this->getStorage()->getCountAttempts($request) >= $this->options['max_count_attempts']) {
-
-            $lastAttemptDate = $this->getStorage()->getLastAttemptDate($request);
-            $dateAllowLogin = $lastAttemptDate->modify('+' . $this->options['timeout'] . ' second');
-
-            if ($dateAllowLogin->diff(new \DateTime())->invert === 1) {
-                return false;
+        $checkMethods = $this->options['method'] == 'both' ? [ 'ip', 'user' ] : [ $this->options['method'] ];
+        foreach ($checkMethods as $method) {
+            $maxCount = $this->options['max_count_attempts_by_' . $method];
+            $timeout = $this->options['timeout_by_' . $method];
+            if ($this->getStorage()->getCountAttempts($method, $request) >= $maxCount) {
+                $lastAttemptDate = $this->getStorage()->getLastAttemptDate($method, $request);
+                $dateAllowLogin = $lastAttemptDate->modify('+' . $timeout . ' second');
+                if ($dateAllowLogin->diff(new \DateTime())->invert === 1) {
+                    return false;
+                }
             }
         }
 
         return true;
+    }
+
+    /**
+     * Get time left of user ban
+     *
+     * @param  Request $request [description]
+     * @return integer remaining in seconds of user ban
+     */
+    public function getBanTimeLeft(Request $request)
+    {
+        $checkMethods = $this->options['method'] == 'both' ? [ 'ip', 'user' ] : [ $this->options['method'] ];
+        foreach ($checkMethods as $method) {
+            $maxCount = $this->options['max_count_attempts_by_' . $method];
+            $timeout = $this->options['timeout_by_' . $method];
+            if ($this->getStorage()->getCountAttempts($method, $request) >= $maxCount) {
+                $lastAttemptDate = $this->getStorage()->getLastAttemptDate($method, $request);
+                $dateAllowLogin = clone $lastAttemptDate;
+                $dateAllowLogin = $dateAllowLogin->modify('+' . $timeout . ' second');
+                if ($dateAllowLogin->diff(new \DateTime())->invert === 1) {
+                    $now = (new \DateTime());
+                    return ($lastAttemptDate->getTimestamp() - $now->getTimestamp());
+                }
+            }
+        }
+
+        return 0;
     }
 }
