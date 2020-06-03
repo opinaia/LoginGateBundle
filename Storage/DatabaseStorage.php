@@ -92,7 +92,7 @@ class DatabaseStorage implements StorageInterface
         $startWatchDate = new \DateTime();
         $startWatchDate->modify('-' . $this->getWatchPeriod(). ' second');
 
-        return $this->getRepository()->getCountAttempts($this->method, $id, $startWatchDate);
+        return $this->getRepository()->getCountAttempts($method, $id, $startWatchDate);
     }
 
     /**
